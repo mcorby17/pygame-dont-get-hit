@@ -1,4 +1,4 @@
-import pygame, sys
+import pygame, sys, time
 
 pygame.init()
 
@@ -11,11 +11,29 @@ fpsClock = pygame.time.Clock()
 GUY = pygame.image.load('dood.png')
 # Resize
 GUY = pygame.transform.scale(GUY, (100, 100))
+GUY_RECT = GUY.get_rect()
 
-guy_x = 200
-guy_y = 200
+# Create square obstacle
+Square_X = 0
+Square_Y = 0
+Square_Width = 100
+Square_Height = 100
+SQUARE = pygame.Rect(Square_X, Square_Y, Square_Width, Square_Height)
+
+GUY_RECT.x = 200
+GUY_RECT.y = 200
+
+moveIncriment = 10
 
 moveDirection = "None"
+
+#for font in pygame.font.get_fonts():
+#    print(str(font))
+
+if pygame.font.get_init():
+    ComicSans = pygame.font.SysFont(None, 200)
+    GameOverText = ComicSans.render('WASTED', False, (255, 0, 0))
+    print("Font initialized")
 
 while True:
     for event in pygame.event.get():
@@ -41,16 +59,31 @@ while True:
     # Change pixel location based on movement type
     # TODO: place in function
     if moveDirection == "right":
-        guy_x += 10
+        GUY_RECT.x += 10
     elif moveDirection == "left":
-        guy_x -= 10
+        GUY_RECT.x -= 10
     elif moveDirection == "up":
-        guy_y -= 10
+        GUY_RECT.y -= 10
     elif moveDirection == "down":
-        guy_y += 10
+        GUY_RECT.y += 10
+
+    # Invert the incriment value whenever the square touches the edge of the screen
+    SQUARE.x += moveIncriment
+    if SQUARE.x > (SCREEN.get_width() - SQUARE.width) or \
+    SQUARE.x <= -1:
+        moveIncriment = -moveIncriment
+
+    #print("SQUARE: " + str(SQUARE))
 
     SCREEN.fill((255, 255, 255))
-    SCREEN.blit(GUY, (guy_x, guy_y))
+    pygame.draw.rect(SCREEN, (255, 255, 0), SQUARE)
+    SCREEN.blit(GUY, (GUY_RECT.x, GUY_RECT.y))
+
+    #print("GUY RECT: " + str(GUY_RECT))
+
+    if GUY_RECT.colliderect(SQUARE):
+        SCREEN.blit(GameOverText, (200, 200))
+
     pygame.display.update()
 
     # Keep FPS at 30 so CPU does go nuts and
